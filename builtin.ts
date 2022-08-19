@@ -84,7 +84,7 @@ export default function (api: PluginApi) {
         serialPort: InstanceType<typeof api.SerialPort>;
         dataListeners: Record<number, (data: Buffer) => void> = {};
 
-        constructor(properties: HMApi.Room) {
+        constructor(properties: HMApi.T.Room) {
             super(properties);
 
             this.serialPort = new api.SerialPort({
@@ -201,7 +201,7 @@ export default function (api: PluginApi) {
         static id: `${string}:${string}` = "light:standard";
         static super_name = "Light";
         static sub_name = "Standard";
-        static icon: HMApi.IconName = "Lightbulb";
+        static icon: HMApi.T.IconName = "Lightbulb";
         static forRoomController: `${string}:${string}` | `${string}:*` = "arduino:*";
         static settingsFields: SettingsFieldDef[] = [
             {
@@ -226,7 +226,7 @@ export default function (api: PluginApi) {
         static hasMainToggle = true;
 
 
-        constructor(properties: HMApi.Device, roomId: string) {
+        constructor(properties: HMApi.T.Device, roomId: string) {
             super(properties, roomId);
         }
 
@@ -265,7 +265,7 @@ export default function (api: PluginApi) {
         static id: `${string}:${string}` = "thermometer:dht";
         static super_name = "Thermometer";
         static sub_name = "DHT";
-        static icon: HMApi.IconName = "TemperatureHalf";
+        static icon: HMApi.T.IconName = "TemperatureHalf";
         static forRoomController: `${string}:${string}` | `${string}:*` = "arduino:*";
         static settingsFields: SettingsFieldDef[] = [
             {
@@ -367,7 +367,7 @@ export default function (api: PluginApi) {
             }
         }
 
-        async getCurrentState(): Promise<{ icon: HMApi.IconName | undefined; iconText: string | undefined; iconColor: HMApi.UIColor | undefined; mainToggleState: boolean; statusText: string; activeColor: HMApi.UIColor | undefined; }> {
+        async getCurrentState() {
             const commandCode = {
                 "11": ArduinoCommands.DHT11,
                 "21": ArduinoCommands.DHT21,
