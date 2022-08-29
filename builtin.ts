@@ -7,25 +7,25 @@ export default function (api: PluginApi) {
     const logLightStandard = new api.Log("LightStandardDevice");
 
     enum ArduinoCommands {
-        pinMode= 0,
-        digitalWrite= 1,
-        digitalRead= 2,
-        analogWrite= 3,
-        analogRead= 4,
+        pinMode = 0,
+        digitalWrite = 1,
+        digitalRead = 2,
+        analogWrite = 3,
+        analogRead = 4,
         DHT11 = 50,
         DHT21 = 51,
         DHT22 = 52,
     }
 
     enum PinMode {
-        INPUT= 0,
-        OUTPUT= 1,
-        INPUT_PULLUP= 2
+        INPUT = 0,
+        OUTPUT = 1,
+        INPUT_PULLUP = 2
     }
 
     enum PinState {
-        LOW= 0,
-        HIGH= 1
+        LOW = 0,
+        HIGH = 1
     }
 
     class ArduinoSerialController extends (api.RoomControllerInstance) {
@@ -54,12 +54,12 @@ export default function (api: PluginApi) {
                         whenNormal: "Refresh ports",
                         whenLoading: "Scanning"
                     }],
-                    callback: async() => {
+                    callback: async () => {
                         const ports = await api.SerialPort.list();
                         return ports.map(port => ({
                             value: port.path,
                             label: port.path,
-                            subtext: arduinoBoards[port.vendorId+'-'+port.productId]
+                            subtext: arduinoBoards[port.vendorId + '-' + port.productId]
                         }));
                     },
                 }
@@ -95,33 +95,33 @@ export default function (api: PluginApi) {
         }
 
         async init() {
-            this.serialPort.on('close', ()=> {
+            this.serialPort.on('close', () => {
                 logArduinoSerial.w('Serial port closed', this.initialized);
-                if(this.initialized) {
+                if (this.initialized) {
                     this.disable("Serial port closed");
                 }
             });
-            await new Promise<void>((resolve)=> {
+            await new Promise<void>((resolve) => {
                 this.serialPort.open((error) => {
                     logArduinoSerial.i('Opened serial port', this.serialPort.path);
-                    if(error) {
+                    if (error) {
                         this.disable(error.message);
                         resolve();
                     } else {
-                        this.serialPort.on('data', (data: Buffer)=> {
+                        this.serialPort.on('data', (data: Buffer) => {
                             logArduinoSerial.i('Received data', Array(data.values()));
-                            if(data[0] === 0) {
+                            if (data[0] === 0) {
                                 resolve();
                             }
                         });
                     }
                 });
             });
-            const parser = this.serialPort.pipe(new ReadlineParser({ 
+            const parser = this.serialPort.pipe(new ReadlineParser({
                 encoding: 'hex',
                 delimiter: '0d0a' // \r\n
             }));
-            parser.on('data', (data: string)=> {
+            parser.on('data', (data: string) => {
                 const buffer = Buffer.from(data, 'hex');
                 const command = buffer[0];
                 const rest = buffer.slice(1);
@@ -132,9 +132,9 @@ export default function (api: PluginApi) {
 
         async dispose(): Promise<void> {
             await super.dispose();
-            if(this.serialPort.isOpen) {
-                await new Promise<void>((resolve)=> {
-                    this.serialPort.close(()=> resolve());
+            if (this.serialPort.isOpen) {
+                await new Promise<void>((resolve) => {
+                    this.serialPort.close(() => resolve());
                 });
             }
             this.serialPort.destroy();
@@ -142,8 +142,8 @@ export default function (api: PluginApi) {
 
         static async validateSettings(settings: Record<string, string | number | boolean>): Promise<string | void> {
             const port = settings["port"] as string;
-            const ports = (await api.SerialPort.list()).map(p=>p.path);
-            if(!ports.includes(port)) {
+            const ports = (await api.SerialPort.list()).map(p => p.path);
+            if (!ports.includes(port)) {
                 return "Port does not exist / is disconnected";
             }
         }
@@ -158,14 +158,14 @@ export default function (api: PluginApi) {
             const port = this.settings.port as string;
             const serial = this.serialPort;
             logArduinoSerial.i('Sending command to', serial.path, command, pin, value);
-            if(serial.isOpen) {
+            if (serial.isOpen) {
                 await new Promise<void>((resolve) => {
                     serial.write((
                         value === undefined ?
                             [command, pin] :
                             [command, pin, value]
-                    ), error=> {
-                        if(error) {
+                    ), error => {
+                        if (error) {
                             this.disable(error.message);
                         }
                         resolve();
@@ -232,7 +232,7 @@ export default function (api: PluginApi) {
 
         get roomController() {
             const c = super.roomController;
-            if(c instanceof ArduinoSerialController) {
+            if (c instanceof ArduinoSerialController) {
                 return c;
             } else {
                 throw new Error("Room controller is not an ArduinoSerialController"); // This error will crash hub. The reason for doing this is that things have gone too wrong for other means of error handling to be used.
@@ -403,17 +403,17 @@ export default function (api: PluginApi) {
         static defaultInteraction = "humidity";
 
         static validateSettings(settings: Record<string, string | number | boolean>) {
-            if(settings.cold_threshold > settings.warm_threshold) {
+            if (settings.cold_threshold > settings.warm_threshold) {
                 return "Cold threshold must be below warm threshold";
             }
-            if(settings.warm_threshold > settings.hot_threshold) {
+            if (settings.warm_threshold > settings.hot_threshold) {
                 return "Warm threshold must be below hot threshold";
             }
         }
 
         get roomController() {
             const c = super.roomController;
-            if(c instanceof ArduinoSerialController) {
+            if (c instanceof ArduinoSerialController) {
                 return c;
             } else {
                 throw new Error("Room controller is not an ArduinoSerialController"); // This error will crash hub. The reason for doing this is that things have gone too wrong for other means of error handling to be used.
@@ -429,21 +429,21 @@ export default function (api: PluginApi) {
             const data = await this.roomController.sendCommandWithResponse(commandCode, this.settings.pin as number);
             let temperature = data.readFloatLE(0);
             const humidity = data.readFloatLE(4);
-            if(temperature === -999 && humidity === -999) {
+            if (temperature === -999 && humidity === -999) {
                 this.disable("DHT sensor is not connected or wrong type is specified in settings");
             } else {
                 this.disabled = false;
             }
-            this.iconColor = 
-                temperature < this.settings.cold_threshold ? 'blue' : 
+            this.iconColor =
+                temperature < this.settings.cold_threshold ? 'blue' :
                     temperature < this.settings.warm_threshold ? undefined :
                         temperature < this.settings.hot_threshold ? 'orange' :
                             'red';
             const temperatureUnit = this.settings.unit as 'c' | 'f' | 'k';
-            if(temperatureUnit === 'f') {
+            if (temperatureUnit === 'f') {
                 temperature = (temperature * 9 / 5) + 32;
             }
-            if(temperatureUnit === 'k') {
+            if (temperatureUnit === 'k') {
                 temperature += 273.15;
             }
 
@@ -454,8 +454,8 @@ export default function (api: PluginApi) {
             };
             this.interactionStates["humidity"] = {
                 text: `Humidity: ${humidity.toFixed(1)}%`,
-                color: 
-                    humidity < this.settings.dry_threshold ? 'orange' : 
+                color:
+                    humidity < this.settings.dry_threshold ? 'orange' :
                         humidity < this.settings.wet_threshold ? undefined :
                             'blue'
             };
