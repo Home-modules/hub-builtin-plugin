@@ -310,10 +310,11 @@ export default function (api: PluginApi) {
                                 id: 'cold_threshold',
                                 type: 'number',
                                 label: 'Cold threshold',
-                                description: 'The temperature below which the temperature reading will turn blue, in Celsius',
+                                description: 'The temperature below which the reading will turn blue',
                                 min: -273.15,
                                 max: 1000,
-                                default: 20
+                                default: 20,
+                                postfix: "°C"
                             }
                         ]
                     },
@@ -323,10 +324,11 @@ export default function (api: PluginApi) {
                                 id: 'warm_threshold',
                                 type: 'number',
                                 label: 'Warm threshold',
-                                description: 'The temperature above which the temperature reading will turn orange, in Celsius',
+                                description: 'The temperature above which the reading will turn orange',
                                 min: -273.15,
                                 max: 1000,
-                                default: 30
+                                default: 30,
+                                postfix: "°C"
                             },
                         ]
                     },
@@ -336,18 +338,64 @@ export default function (api: PluginApi) {
                                 id: 'hot_threshold',
                                 type: 'number',
                                 label: 'Hot threshold',
-                                description: 'The temperature above which the temperature reading will turn red, in Celsius',
+                                description: 'The temperature above which the reading will turn red',
                                 min: -273.15,
                                 max: 1000,
-                                default: 40
+                                default: 40,
+                                postfix: "°C"
                             }
                         ]
-                    }
+                    },
                 ]
-            }
+            },
+            {
+                type: 'horizontal_wrapper',
+                columns: [
+                    {
+                        fields: [
+                            {
+                                id: 'dry_threshold',
+                                type: 'number',
+                                label: 'Dry threshold',
+                                description: 'The humidity below which the reading will turn orange',
+                                min: 0,
+                                max: 100,
+                                default: 30,
+                                postfix: "%",
+                            }
+                        ]
+                    },
+                    {
+                        fields: [
+                            {
+                                id: 'wet_threshold',
+                                type: 'number',
+                                label: 'Wet threshold',
+                                description: 'The humidity above which the reading will turn blue',
+                                min: 0,
+                                max: 100,
+                                default: 60,
+                                postfix: "%",
+                            },
+                        ]
+                    },
+                ]
+            },
         ];
         static hasMainToggle = false;
         static clickable = false;
+        static interactions: Record<string, HMApi.T.DeviceInteraction.Type> = {
+            "temperature": {
+                type: "label",
+                defaultValue: "Temperature: Unknown",
+                size: "large"
+            },
+            "humidity": {
+                type: "label",
+                defaultValue: "Humidity: Unknown"
+            }
+        };
+        static defaultInteraction = "humidity";
 
         static validateSettings(settings: Record<string, string | number | boolean>) {
             if(settings.cold_threshold > settings.warm_threshold) {
@@ -394,8 +442,18 @@ export default function (api: PluginApi) {
                 temperature += 273.15;
             }
 
-            this.iconText = `${temperature.toFixed(1)}${temperatureUnit==='k'?'':'°'}${temperatureUnit.toUpperCase()}`;
-            this.statusText = `Humidity: ${humidity.toFixed(1)}%`;
+            this.iconText = `${temperature.toFixed(1)}${temperatureUnit === 'k' ? '' : '°'}${temperatureUnit.toUpperCase()}`;
+            this.interactionStates["temperature"] = {
+                text: `Temperature: ${this.iconText}`,
+                color: this.iconColor
+            };
+            this.interactionStates["humidity"] = {
+                text: `Humidity: ${humidity.toFixed(1)}%`,
+                color: 
+                    humidity < this.settings.dry_threshold ? 'orange' : 
+                        humidity < this.settings.wet_threshold ? undefined :
+                            'blue'
+            };
 
             return super.getCurrentState();
         }
