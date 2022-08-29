@@ -305,6 +305,7 @@ export default function (api: PluginApi) {
                 type: 'horizontal_wrapper',
                 columns: [
                     {
+                        width: 1,
                         fields: [
                             {
                                 id: 'cold_threshold',
@@ -319,6 +320,7 @@ export default function (api: PluginApi) {
                         ]
                     },
                     {
+                        width: 1,
                         fields: [
                             {
                                 id: 'warm_threshold',
@@ -333,6 +335,7 @@ export default function (api: PluginApi) {
                         ]
                     },
                     {
+                        width: 1,
                         fields: [
                             {
                                 id: 'hot_threshold',
@@ -352,6 +355,7 @@ export default function (api: PluginApi) {
                 type: 'horizontal_wrapper',
                 columns: [
                     {
+                        width: 1,
                         fields: [
                             {
                                 id: 'dry_threshold',
@@ -366,6 +370,7 @@ export default function (api: PluginApi) {
                         ]
                     },
                     {
+                        width: 1,
                         fields: [
                             {
                                 id: 'wet_threshold',
