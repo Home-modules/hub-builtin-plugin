@@ -1,5 +1,4 @@
-import { registerDeviceType } from "../../../src/devices.js";
-import { registerRoomController } from "../../../src/plugins.js";
+import { registerRoomController, registerDeviceType } from "../../../src/plugins.js";
 import { LightStandardDevice } from "./device-types/light_standard.js";
 import ArduinoSerialController from "./room-controllers/arduino_serial.js";
 import { ThermometerDHTDevice } from "./device-types/thermometer_dht.js";
