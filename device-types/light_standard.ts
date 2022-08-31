@@ -7,7 +7,7 @@ export class LightStandardDevice extends DeviceInstance {
     static super_name = "Light";
     static sub_name = "Standard";
     static icon: HMApi.T.IconName = "Lightbulb";
-    static forRoomController: `${string}:${string}` | `${string}:*` = "arduino:*";
+    static forRoomController: `${string}:${string}` | `${string}:*` | '*' = "arduino:*";
     static settingsFields: SettingsFieldDef[] = [
         {
             id: 'pin',
